@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Rush Tycoon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        .crypto-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #000000 50%, #dc2626 100%);
+        }
+        
+        .coin-pulse {
+            animation: coinPulse 0.3s ease-out;
+        }
+        
+        @keyframes coinPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating-points {
+            animation: floatUp 1s ease-out forwards;
+        }
+        
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+        
+        .nft-glow {
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+        }
+        
+        .mining-animation {
+            animation: mining 2s infinite;
+        }
+        
+        @keyframes mining {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-black text-white font-mono overflow-x-hidden">
+    <!-- Enhanced Top Bar with Player Panel, Notifications & Social -->
+    <div class="fixed top-4 right-4 z-50 flex space-x-2">
+        <!-- Player Panel -->
+        <div class="relative">
+            <button onclick="togglePlayerPanel()" class="bg-gradient-to-br from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all border-2 border-yellow-400">
+                <span class="text-xl">👤</span>
+            </button>
+            <div class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold" id="playerLevel">1</div>
+        </div>
+        
+        <!-- Notifications -->
+        <div class="relative">
+            <button onclick="toggleNotifications()" class="bg-purple-600 hover:bg-purple-700 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all">
+                <span class="text-xl">🔔</span>
+            </button>
+            <div id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">3</div>
+        </div>
+        
+        <!-- Telegram Quick Access -->
+        <div class="relative">
+            <button onclick="openTelegramMini()" class="bg-blue-500 hover:bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.896 6.728-1.268 7.928-1.268 7.928-.16.906-.576 1.056-.576 1.056s-.736.064-1.632-.576c-.896-.64-2.432-1.536-2.432-1.536s-2.752-1.792-3.712-2.432c-.96-.64-1.024-1.088-.576-1.728.448-.64 2.048-1.92 4.096-3.776 1.024-.928 2.24-2.112 2.56-2.624.32-.512.064-.832-.384-.576-1.152.64-3.392 2.176-4.608 2.944-1.216.768-1.856.832-2.624.576-.768-.256-1.664-.512-1.664-.512s-1.216-.384-.832-1.216c.384-.832 1.472-1.216 1.472-1.216l6.272-2.432c1.216-.448 2.688-.832 2.688-.832s.96-.192 1.536.128c.576.32.64.768.64.768z"/>
+                </svg>
+            </button>
+            <div class="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full animate-pulse"></div>
+        </div>
+        
+        <!-- Language -->
+        <button onclick="toggleLanguage()" class="bg-blue-600 hover:bg-blue-700 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all">
+            <span class="text-sm font-bold" id="langBtn">PL</span>
+        </button>
+        
+        <!-- Support -->
+        <button onclick="toggleSupport()" id="supportBtn" class="bg-red-600 hover:bg-red-700 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all">
+            <span class="text-xl">🎧</span>
+        </button>
+    </div>
+
+    <!-- Player Panel -->
+    <div id="playerPanel" class="fixed top-20 right-4 w-96 bg-gradient-to-br from-gray-900 to-black border border-yellow-600 rounded-lg shadow-xl z-40 hidden max-h-[80vh] overflow-y-auto">
+        <div class="p-4">
+            <!-- Player Header -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center border-2 border-yellow-400">
+                        <span class="text-2xl">👤</span>
+                    </div>
+                    <div>
+                        <h3 class="text-yellow-400 font-bold text-lg" id="playerName">CryptoMiner</h3>
+                        <div class="text-sm text-gray-400">Poziom <span id="playerLevelText">1</span> • <span id="playerTitle">Początkujący Górnik</span></div>
+                    </div>
+                </div>
+                <button onclick="togglePlayerPanel()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            
+            <!-- Player Tabs -->
+            <div class="flex space-x-1 mb-4 bg-black/50 rounded-lg p-1">
+                <button onclick="showPlayerTab('profile')" id="profileTab" class="flex-1 py-2 px-3 rounded text-xs font-bold bg-yellow-600 text-black">👤 PROFIL</button>
+                <button onclick="showPlayerTab('stats')" id="statsTab" class="flex-1 py-2 px-3 rounded text-xs font-bold text-gray-400 hover:text-white">📊 STATYSTYKI</button>
+                <button onclick="showPlayerTab('inventory')" id="inventoryTab" class="flex-1 py-2 px-3 rounded text-xs font-bold text-gray-400 hover:text-white">🎒 EKWIPUNEK</button>
+                <button onclick="showPlayerTab('settings')" id="settingsTab" class="flex-1 py-2 px-3 rounded text-xs font-bold text-gray-400 hover:text-white">⚙️ USTAWIENIA</button>
+            </div>
+            
+            <!-- Profile Tab -->
+            <div id="profileContent" class="space-y-4">
+                <!-- Level Progress -->
+                <div class="bg-black/50 p-4 rounded-lg border border-yellow-600/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-yellow-400 font-bold">🏆 Poziom Gracza</span>
+                        <span class="text-sm text-gray-400"><span id="currentXP">0</span>/<span id="requiredXP">1000</span> XP</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+                        <div id="xpBar" class="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-gray-400">Następny poziom: <span id="nextLevelReward">+2 Tap Power</span></div>
+                </div>
+                
+                <!-- Player Avatar Customization -->
+                <div class="bg-black/50 p-4 rounded-lg border border-yellow-600/30">
+                    <h4 class="text-yellow-400 font-bold mb-3">🎨 Personalizacja Awatara</h4>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="changeAvatar('👤')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">👤</button>
+                        <button onclick="changeAvatar('🤖')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">🤖</button>
+                        <button onclick="changeAvatar('👑')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">👑</button>
+                        <button onclick="changeAvatar('💎')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">💎</button>
+                        <button onclick="changeAvatar('🔥')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">🔥</button>
+                        <button onclick="changeAvatar('⚡')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">⚡</button>
+                        <button onclick="changeAvatar('🚀')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">🚀</button>
+                        <button onclick="changeAvatar('🎯')" class="w-12 h-12 bg-gray-700 hover:bg-yellow-600 rounded-lg flex items-center justify-center text-xl transition-all">🎯</button>
+                    </div>
+                </div>
+                
+                <!-- Player Name Change -->
+                <div class="bg-black/50 p-4 rounded-lg border border-yellow-600/30">
+                    <h4 class="text-yellow-400 font-bold mb-3">✏️ Zmień Nazwę</h4>
+                    <div class="flex space-x-2">
+                        <input type="text" id="newPlayerName" class="flex-1 bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white text-sm" placeholder="Nowa nazwa gracza...">
+                        <button onclick="changePlayerName()" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-black font-bold text-sm">Zmień</button>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">Koszt: 100 PCRG • Maksymalnie 20 znaków</div>
+                </div>
+                
+                <!-- Achievements Showcase -->
+                <div class="bg-black/50 p-4 rounded-lg border border-yellow-600/30">
+                    <h4 class="text-yellow-400 font-bold mb-3">🏅 Ulubione Osiągnięcia</h4>
+                    <div class="grid grid-cols-3 gap-2" id="showcaseAchievements">
+                        <div class="bg-gray-700 p-2 rounded text-center">
+                            <div class="text-lg">👆</div>
+                            <div class="text-xs">Pierwsze Tap</div>
+                        </div>
+                        <div class="bg-gray-700 p-2 rounded text-center opacity-50">
+                            <div class="text-lg">🔒</div>
+                            <div class="text-xs">Zablokowane</div>
+                        </div>
+                        <div class="bg-gray-700 p-2 rounded text-center opacity-50">
+                            <div class="text-lg">🔒</div>
+                            <div class="text-xs">Zablokowane</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Tab -->
+            <div id="statsContent" class="space-y-4 hidden">
+                <!-- Lifetime Stats -->
+                <div class="bg-black/50 p-4 rounded-lg border border-blue-600/30">
+                    <h4 class="text-blue-400 font-bold mb-3">📈 Statystyki Życiowe</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Całkowite CRG</div>
+                            <div class="font-bold text-green-400" id="lifetimeCRG">0</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Całkowite Tapnięcia</div>
+                            <div class="font-bold text-red-400" id="lifetimeTaps">0</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Czas Gry</div>
+                            <div class="font-bold text-blue-400" id="playtime">0h 0m</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Dni Logowania</div>
+                            <div class="font-bold text-purple-400" id="loginDays">1</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Najwyższe Combo</div>
+                            <div class="font-bold text-yellow-400" id="maxCombo">0</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Prestiże</div>
+                            <div class="font-bold text-orange-400" id="prestigeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Current Session -->
+                <div class="bg-black/50 p-4 rounded-lg border border-green-600/30">
+                    <h4 class="text-green-400 font-bold mb-3">⏱️ Obecna Sesja</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">CRG w Sesji</div>
+                            <div class="font-bold text-green-400" id="sessionCRG">0</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Tapnięcia w Sesji</div>
+                            <div class="font-bold text-red-400" id="sessionTaps">0</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">Czas Sesji</div>
+                            <div class="font-bold text-blue-400" id="sessionTime">0m</div>
+                        </div>
+                        <div class="bg-gray-800/50 p-2 rounded">
+                            <div class="text-gray-400">CRG/min</div>
+                            <div class="font-bold text-yellow-400" id="crgPerMin">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mining Efficiency -->
+                <div class="bg-black/50 p-4 rounded-lg border border-purple-600/30">
+                    <h4 class="text-purple-400 font-bold mb-3">⚡ Efektywność Kopania</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Siła Tapnięcia:</span>
+                            <span class="font-bold" id="efficiencyTapPower">1</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Mnożnik Bonusów:</span>
+                            <span class="font-bold text-yellow-400" id="efficiencyMultiplier">1.0x</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Pasywne CRG/s:</span>
+                            <span class="font-bold text-green-400" id="efficiencyPassive">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Efektywność Energii:</span>
+                            <span class="font-bold text-blue-400" id="efficiencyEnergy">100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory Tab -->
+            <div id="inventoryContent" class="space-y-4 hidden">
+                <!-- Active Items -->
+                <div class="bg-black/50 p-4 rounded-lg border border-green-600/30">
+                    <h4 class="text-green-400 font-bold mb-3">🎯 Aktywne Przedmioty</h4>
+                    <div id="activeItems" class="space-y-2">
+                        <div class="text-gray-400 text-sm text-center">Brak aktywnych przedmiotów</div>
+                    </div>
+                </div>
+                
+                <!-- Owned NFTs -->
+                <div class="bg-black/50 p-4 rounded-lg border border-purple-600/30">
+                    <h4 class="text-purple-400 font-bold mb-3">🎨 Kolekcja NFT</h4>
+                    <div id="inventoryNFTs" class="grid grid-cols-3 gap-2">
+                        <div class="bg-gray-700 p-3 rounded text-center opacity-50">
+                            <div class="text-2xl mb-1">🔒</div>
+                            <div class="text-xs">Brak NFT</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boosters -->
+                <div class="bg-black/50 p-4 rounded-lg border border-yellow-600/30">
+                    <h4 class="text-yellow-400 font-bold mb-3">⚡ Boostery</h4>
+                    <div id="inventoryBoosters" class="space-y-2">
+                        <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xl">⚡</span>
+                                <div>
+                                    <div class="font-bold text-sm">2x Mnożnik</div>
+                                    <div class="text-xs text-gray-400">30 minut</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold" id="booster2xCount">0</div>
+                                <button onclick="useBooster('2x')" class="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs font-bold text-black">Użyj</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xl">🔋</span>
+                                <div>
+                                    <div class="font-bold text-sm">Pełna Energia</div>
+                                    <div class="text-xs text-gray-400">Natychmiastowe</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold" id="boosterEnergyCount">0</div>
+                                <button onclick="useBooster('energy')" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs font-bold">Użyj</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Consumables -->
+                <div class="bg-black/50 p-4 rounded-lg border border-red-600/30">
+                    <h4 class="text-red-400 font-bold mb-3">🍎 Przedmioty Jednorazowe</h4>
+                    <div id="inventoryConsumables" class="space-y-2">
+                        <div class="text-gray-400 text-sm text-center">Brak przedmiotów jednorazowych</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settingsContent" class="space-y-4 hidden">
+                <!-- Game Settings -->
+                <div class="bg-black/50 p-4 rounded-lg border border-gray-600/30">
+                    <h4 class="text-gray-400 font-bold mb-3">🎮 Ustawienia Gry</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                     
